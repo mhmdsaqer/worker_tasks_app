@@ -6,4 +6,4 @@ const TextStyle mainTextStyle = TextStyle(
     color: Colors.white,
     decoration: TextDecoration.none,
     fontWeight: FontWeight.bold,
-    fontSize: 35.0);
+    fontSize: 30.0);

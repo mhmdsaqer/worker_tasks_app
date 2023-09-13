@@ -3,18 +3,20 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 
 class CustemTextFormField extends StatefulWidget {
-  CustemTextFormField({
-    required this.Controller,
-    required this.inputType,
-    required this.hintString,
-    this.vali,
-  });
+  CustemTextFormField(
+      {required this.Controller,
+      this.inputType,
+      required this.hintString,
+      this.focusNodee,
+      this.onEditing,
+      this.txtInputAction});
 
   TextEditingController? Controller;
   TextInputType? inputType;
   String? hintString;
-  String? Function(String?)? vali;
-
+  FocusNode? focusNodee;
+  Function? onEditing;
+  TextInputAction? txtInputAction;
   @override
   State<CustemTextFormField> createState() => _CustemTextFormFieldState();
 }
@@ -44,10 +46,13 @@ class _CustemTextFormFieldState extends State<CustemTextFormField> {
           return null;
         }
       },
+      textInputAction: widget.txtInputAction,
       obscureText: widget.hintString == 'Password' ? un_visible : false,
       style: TextStyle(color: Colors.white),
       controller: widget.Controller,
-      keyboardType: widget.inputType,
+      keyboardType: widget.inputType == 'Position in the Company'
+          ? null
+          : widget.inputType,
       decoration: InputDecoration(
         suffixIcon: widget.hintString == 'Password'
             ? GestureDetector(

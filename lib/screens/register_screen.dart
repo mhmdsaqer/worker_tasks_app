@@ -4,38 +4,43 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:worker_tasks_app/constants.dart';
 import 'package:worker_tasks_app/screens/forget_password_screen.dart';
-import 'package:worker_tasks_app/screens/register_screen.dart';
+import 'package:worker_tasks_app/screens/login_screen.dart';
 import 'package:worker_tasks_app/widgets/custem_button.dart';
 import 'package:worker_tasks_app/widgets/custem_rich_text.dart';
 import 'package:worker_tasks_app/widgets/custem_textformfield.dart';
 
-class LoginScreen extends StatefulWidget {
+class RegisterScreen extends StatefulWidget {
   static String id = 'loginScreen';
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
+class _RegisterScreenState extends State<RegisterScreen>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
+  TextEditingController _fullnameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passController = TextEditingController();
-  FocusNode submitNode = FocusNode();
+  TextEditingController _posController = TextEditingController();
+  FocusNode? emailNode = FocusNode();
+  FocusNode? passNode = FocusNode();
+  FocusNode? fullnameNode = FocusNode();
+  FocusNode? posNode = FocusNode();
 
-  FocusNode emailNode = FocusNode();
-  FocusNode passNode = FocusNode();
-
-  final _loginKey = GlobalKey<FormState>();
+  final _registerKey = GlobalKey<FormState>();
   @override
   void dispose() {
     _animationController.dispose();
     _emailController.dispose();
     _passController.dispose();
-    emailNode.dispose();
-    passNode.dispose();
-    submitNode.dispose();
+    _fullnameController.dispose();
+    _posController.dispose();
+    emailNode!.dispose();
+    passNode!.dispose();
+    fullnameNode!.dispose();
+    posNode!.dispose();
 
     super.dispose();
   }
@@ -59,6 +64,16 @@ class _LoginScreenState extends State<LoginScreen>
           });
     _animationController.forward();
     super.initState();
+  }
+
+  void submitButton() {
+    bool? isValid = _registerKey.currentState!.validate();
+    FocusScope.of(context).unfocus();
+    if (isValid) {
+      print('form is valid');
+    } else {
+      print('form is not valid');
+    }
   }
 
   @override
@@ -88,24 +103,36 @@ class _LoginScreenState extends State<LoginScreen>
                   SizedBox(
                     height: size.height * 0.1,
                   ),
-                  const Text('Login', style: mainTextStyle),
+                  const Text('Register', style: mainTextStyle),
                   SizedBox(
                     height: size.height * 0.02,
                   ),
                   CustemRichText(
                       aligment: Alignment.topLeft,
                       onTap: () {
-                        Navigator.pushNamed(context, RegisterScreen.id);
+                        Navigator.pop(context);
                       },
-                      text_one: 'Don\'t have an account ? ',
-                      text_two: 'Register'),
+                      text_one: 'Already have an account ? ',
+                      text_two: 'Log in'),
                   SizedBox(
                     height: size.height * 0.02,
                   ),
                   Form(
-                    key: _loginKey,
+                    key: _registerKey,
                     child: Column(
                       children: [
+                        CustemTextFormField(
+                            onEditing: () {
+                              FocusScope.of(context).requestFocus(emailNode);
+                            },
+                            txtInputAction: TextInputAction.next,
+                            focusNodee: fullnameNode,
+                            Controller: _fullnameController,
+                            inputType: TextInputType.name,
+                            hintString: 'Full Name'),
+                        SizedBox(
+                          height: size.height * 0.02,
+                        ),
                         CustemTextFormField(
                             onEditing: () {
                               FocusScope.of(context).requestFocus(passNode);
@@ -119,35 +146,39 @@ class _LoginScreenState extends State<LoginScreen>
                           height: size.height * 0.02,
                         ),
                         CustemTextFormField(
+                            onEditing: () {
+                              FocusScope.of(context).requestFocus(posNode);
+                            },
                             txtInputAction: TextInputAction.done,
-                            onEditing: submitButton,
                             focusNodee: passNode,
                             Controller: _passController,
                             inputType: TextInputType.visiblePassword,
                             hintString: 'Password'),
+                        SizedBox(
+                          height: size.height * 0.02,
+                        ),
+                        CustemTextFormField(
+                            onEditing: submitButton,
+                            txtInputAction: TextInputAction.next,
+                            focusNodee: posNode,
+                            Controller: _posController,
+                            hintString: 'Position in the Company'),
+                        SizedBox(
+                          height: size.height * 0.02,
+                        ),
                       ],
                     ),
                   ),
                   SizedBox(
                     height: size.height * 0.1,
                   ),
-                  CustemRichText(
-                      aligment: Alignment.bottomRight,
-                      onTap: () {
-                        Navigator.pushNamed(context, ForgetPasswordScreen.id!);
-                      },
-                      text_one: 'Forget your password ? ',
-                      text_two: 'Click Here'),
-                  SizedBox(
-                    height: size.height * 0.05,
-                  ),
                   CustemButton(
-                      text: "Login",
+                      text: "Register",
                       onPressed: () {
                         submitButton();
                       },
                       icon: Icon(
-                        Icons.login,
+                        Icons.new_label,
                         color: Colors.white,
                       ))
                 ],
@@ -157,15 +188,5 @@ class _LoginScreenState extends State<LoginScreen>
         ],
       ),
     );
-  }
-
-  void submitButton() {
-    bool? isValid = _loginKey.currentState!.validate();
-    FocusScope.of(context).unfocus();
-    if (isValid) {
-      print('form is valid');
-    } else {
-      print('form is not valid');
-    }
   }
 }
