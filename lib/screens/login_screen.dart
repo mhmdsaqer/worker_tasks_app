@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:worker_tasks_app/constants.dart';
+import 'package:worker_tasks_app/screens/forget_password_screen.dart';
+import 'package:worker_tasks_app/widgets/custem_button.dart';
+import 'package:worker_tasks_app/widgets/custem_rich_text.dart';
 import 'package:worker_tasks_app/widgets/custem_textformfield.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -18,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<double> _animation;
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passController = TextEditingController();
+  final _loginKey = GlobalKey<FormState>();
   @override
   void dispose() {
     _animationController.dispose();
@@ -65,50 +69,69 @@ class _LoginScreenState extends State<LoginScreen>
             errorWidget: (context, url, error) => Icon(Icons.error),
             alignment: FractionalOffset(_animation.value, 0),
           ),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: size.height * 0.1,
-                ),
-                const Text('Login', style: mainTextStyle),
-                SizedBox(
-                  height: size.height * 0.02,
-                ),
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      const TextSpan(
-                          text: 'Don\'t have an account ? ',
-                          style: TextStyle(color: Colors.white)),
-                      TextSpan(
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () => print(''),
-                        text: 'Register',
-                        style: const TextStyle(
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline),
-                      )
-                    ],
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: size.height * 0.1,
                   ),
-                ),
-                SizedBox(
-                  height: size.height * 0.02,
-                ),
-                CustemTextFormField(
-                    Controller: _emailController,
-                    inputType: TextInputType.emailAddress,
-                    hintString: 'Email'),
-                CustemTextFormField(
-                    passSecurity: true,
-                    Controller: _passController,
-                    inputType: TextInputType.visiblePassword,
-                    hintString: 'Password'),
-                passTextField()
-              ],
+                  const Text('Login', style: mainTextStyle),
+                  SizedBox(
+                    height: size.height * 0.02,
+                  ),
+                  CustemRichText(
+                      aligment: Alignment.topLeft,
+                      onTap: () {},
+                      text_one: 'Don\'t have an account ? ',
+                      text_two: 'Register'),
+                  SizedBox(
+                    height: size.height * 0.02,
+                  ),
+                  Form(
+                    key: _loginKey,
+                    child: Column(
+                      children: [
+                        CustemTextFormField(
+                            Controller: _emailController,
+                            inputType: TextInputType.emailAddress,
+                            hintString: 'Email'),
+                        SizedBox(
+                          height: size.height * 0.02,
+                        ),
+                        CustemTextFormField(
+                            Controller: _passController,
+                            inputType: TextInputType.visiblePassword,
+                            hintString: 'Password'),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: size.height * 0.1,
+                  ),
+                  CustemRichText(
+                      aligment: Alignment.bottomRight,
+                      onTap: () {
+                        Navigator.pushNamed(context, ForgetPasswordScreen.id!);
+                      },
+                      text_one: 'Forget your password ? ',
+                      text_two: 'Click Here'),
+                  SizedBox(
+                    height: size.height * 0.05,
+                  ),
+                  CustemButton(
+                      text: "Login",
+                      onPressed: () {
+                        submitButton();
+                      },
+                      icon: Icon(
+                        Icons.login,
+                        color: Colors.white,
+                      ))
+                ],
+              ),
             ),
           )
         ],
@@ -116,27 +139,13 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget passTextField() {
-    return Row(
-      children: [
-        TextFormField(
-          style: TextStyle(color: Colors.white),
-          controller: _passController,
-          keyboardType: TextInputType.visiblePassword,
-          decoration: InputDecoration(
-            hintText: 'hintString',
-            hintStyle: TextStyle(color: Colors.white),
-            border: const UnderlineInputBorder(),
-            enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.white)),
-            focusedBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.yellow)),
-            errorBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.red)),
-          ),
-        ),
-        IconButton(onPressed: () {}, icon: Icon(Icons.remove_red_eye_outlined))
-      ],
-    );
+  void submitButton() {
+    bool? isValid = _loginKey.currentState!.validate();
+    FocusScope.of(context).unfocus();
+    if (isValid) {
+      print('form is valid');
+    } else {
+      print('form is not valid');
+    }
   }
 }
