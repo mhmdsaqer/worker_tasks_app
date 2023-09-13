@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:worker_tasks_app/screens/login_screen.dart';
 
 void main() {
   runApp(const WorkersTaskApp());
@@ -8,6 +9,18 @@ class WorkersTaskApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return MaterialApp(
+      theme: ThemeData(
+        scaffoldBackgroundColor: Color(0xFFEDE7DC),
+        primarySwatch: Colors.blue
+      ),
+      debugShowCheckedModeBanner: false,
+      title: "Workers Task",
+      
+      routes: {
+        LoginScreen.id :(context) => LoginScreen()
+      },
+      home: LoginScreen(),
+    );
   }
 }
