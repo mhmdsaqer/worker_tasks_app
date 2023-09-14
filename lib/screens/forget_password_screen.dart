@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:worker_tasks_app/constants.dart';
+import 'package:worker_tasks_app/helper_methods/submit_method.dart';
 import 'package:worker_tasks_app/screens/login_screen.dart';
 import 'package:worker_tasks_app/widgets/custem_button.dart';
 import 'package:worker_tasks_app/widgets/custem_textformfield.dart';
@@ -15,7 +16,7 @@ class ForgetPasswordScreen extends StatefulWidget {
 
 late AnimationController _animationController;
 late Animation<double> _animation;
-TextEditingController _forgetController = TextEditingController();
+TextEditingController _emailController = TextEditingController();
 final _forgetKey = GlobalKey<FormState>();
 
 class _ForgetPasswordScreenState extends State<ForgetPasswordScreen>
@@ -23,7 +24,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen>
   @override
   void dispose() {
     _animationController.dispose();
-    _forgetController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -95,7 +96,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen>
               Form(
                 key: _forgetKey,
                 child: CustemTextFormField(
-                  Controller: _forgetController,
+                  Controller: _emailController,
                   hintString: 'Email',
                   inputType: TextInputType.emailAddress,
                 ),
@@ -110,22 +111,12 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen>
                   ),
                   text: 'Reset Your Password',
                   onPressed: () {
-                    submetForgt();
+                    submitMethod(context, _forgetKey);
                   })
             ]),
           ),
         )
       ],
     ));
-  }
-
-  void submetForgt() {
-    bool? isValid = _forgetKey.currentState!.validate();
-    FocusScope.of(context).unfocus();
-    if (isValid) {
-      print('valid form');
-    } else {
-      print('unvalid form');
-    }
   }
 }

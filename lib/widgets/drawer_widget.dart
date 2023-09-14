@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:worker_tasks_app/helper_methods/log_out_method.dart';
+import 'package:worker_tasks_app/screens/home_screen.dart';
+import 'package:worker_tasks_app/screens/inner_screens/add_task_screen.dart';
+import 'package:worker_tasks_app/screens/login_screen.dart';
 import 'package:worker_tasks_app/widgets/inkwell_drawer_banners.dart';
 
 class DrawerWidget extends StatelessWidget {
@@ -32,7 +36,9 @@ class DrawerWidget extends StatelessWidget {
           ),
           DrawerInkWell(
             icon: Icons.task,
-            ontap: () {},
+            ontap: () {
+              Navigator.pushReplacementNamed(context, HomeScreen.id);
+            },
             text: 'All Tasks',
           ),
           DrawerInkWell(
@@ -47,7 +53,9 @@ class DrawerWidget extends StatelessWidget {
           ),
           DrawerInkWell(
             icon: Icons.add_task,
-            ontap: () {},
+            ontap: () {
+              Navigator.pushReplacementNamed(context, AddTaskScreen.id);
+            },
             text: 'Add Task',
           ),
           Divider(
@@ -55,7 +63,9 @@ class DrawerWidget extends StatelessWidget {
           ),
           DrawerInkWell(
             icon: Icons.logout,
-            ontap: () {},
+            ontap: () {
+              logOutMethod(context);
+            },
             text: 'Log out',
           ),
         ],

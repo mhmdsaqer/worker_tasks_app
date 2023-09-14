@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:worker_tasks_app/constants.dart';
+import 'package:worker_tasks_app/helper_methods/submit_method.dart';
 import 'package:worker_tasks_app/screens/forget_password_screen.dart';
 import 'package:worker_tasks_app/screens/register_screen.dart';
 import 'package:worker_tasks_app/widgets/custem_button.dart';
@@ -120,7 +121,9 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
                         CustemTextFormField(
                             txtInputAction: TextInputAction.done,
-                            onEditing: submitButton,
+                            onEditing: () {
+                              submitMethod(context, _loginKey);
+                            },
                             focusNodee: passNode,
                             Controller: _passController,
                             inputType: TextInputType.visiblePassword,
@@ -144,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen>
                   CustemButton(
                       text: "Login",
                       onPressed: () {
-                        submitButton();
+                        submitMethod(context, _loginKey);
                       },
                       icon: Icon(
                         Icons.login,
@@ -157,15 +160,5 @@ class _LoginScreenState extends State<LoginScreen>
         ],
       ),
     );
-  }
-
-  void submitButton() {
-    bool? isValid = _loginKey.currentState!.validate();
-    FocusScope.of(context).unfocus();
-    if (isValid) {
-      print('form is valid');
-    } else {
-      print('form is not valid');
-    }
   }
 }

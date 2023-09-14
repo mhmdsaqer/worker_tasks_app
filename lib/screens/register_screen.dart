@@ -9,6 +9,8 @@ import 'package:worker_tasks_app/widgets/custem_button.dart';
 import 'package:worker_tasks_app/widgets/custem_rich_text.dart';
 import 'package:worker_tasks_app/widgets/custem_textformfield.dart';
 
+import '../helper_methods/submit_method.dart';
+
 class RegisterScreen extends StatefulWidget {
   static String id = 'loginScreen';
 
@@ -64,16 +66,6 @@ class _RegisterScreenState extends State<RegisterScreen>
           });
     _animationController.forward();
     super.initState();
-  }
-
-  void submitButton() {
-    bool? isValid = _registerKey.currentState!.validate();
-    FocusScope.of(context).unfocus();
-    if (isValid) {
-      print('form is valid');
-    } else {
-      print('form is not valid');
-    }
   }
 
   @override
@@ -158,7 +150,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                           height: size.height * 0.02,
                         ),
                         CustemTextFormField(
-                            onEditing: submitButton,
+                            onEditing: () {
+                              submitMethod(context, _registerKey);
+                            },
                             txtInputAction: TextInputAction.next,
                             focusNodee: posNode,
                             Controller: _posController,
@@ -175,7 +169,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                   CustemButton(
                       text: "Register",
                       onPressed: () {
-                        submitButton();
+                        submitMethod(context, _registerKey);
                       },
                       icon: Icon(
                         Icons.new_label,
