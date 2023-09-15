@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:worker_tasks_app/helper_methods/log_out_method.dart';
 import 'package:worker_tasks_app/screens/home_screen.dart';
 import 'package:worker_tasks_app/screens/inner_screens/add_task_screen.dart';
+import 'package:worker_tasks_app/screens/inner_screens/all_workers.dart';
 import 'package:worker_tasks_app/screens/login_screen.dart';
 import 'package:worker_tasks_app/widgets/inkwell_drawer_banners.dart';
 
@@ -48,7 +49,9 @@ class DrawerWidget extends StatelessWidget {
           ),
           DrawerInkWell(
             icon: Icons.work,
-            ontap: () {},
+            ontap: () {
+              Navigator.pushReplacementNamed(context, AllWorkersScreen.id);
+            },
             text: 'Registerted Workers',
           ),
           DrawerInkWell(

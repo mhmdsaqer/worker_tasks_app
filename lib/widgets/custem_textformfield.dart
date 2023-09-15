@@ -14,6 +14,8 @@ class CustemTextFormField extends StatefulWidget {
     this.filledColor,
     this.maxLen,
     this.maxLin,
+    this.enabeld,
+    this.black,
   });
 
   TextEditingController? Controller;
@@ -26,6 +28,8 @@ class CustemTextFormField extends StatefulWidget {
   Color? filledColor;
   int? maxLen;
   int? maxLin;
+  bool? enabeld;
+  bool? black;
 
   @override
   State<CustemTextFormField> createState() => _CustemTextFormFieldState();
@@ -56,8 +60,11 @@ class _CustemTextFormFieldState extends State<CustemTextFormField> {
           return null;
         }
       },
+      enabled: widget.enabeld == true ? false : true,
       textInputAction: widget.txtInputAction,
-      style: TextStyle(color: Colors.white),
+      style: widget.black == true
+          ? TextStyle(color: Colors.black)
+          : TextStyle(color: Colors.white),
       controller: widget.Controller,
       keyboardType: widget.inputType == 'Position in the Company'
           ? null

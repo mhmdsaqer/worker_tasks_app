@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:worker_tasks_app/widgets/drawer_widget.dart';
 
-import '../helper_methods/show_category.dart';
-import '../widgets/task_widget.dart';
+import '../../widgets/task_widget.dart';
 
-class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key});
-  static String id = 'homeScreen';
+class AllWorkersScreen extends StatefulWidget {
+  AllWorkersScreen({super.key});
+  static String id = 'allworkesScreen';
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<AllWorkersScreen> createState() => _AllWorkersScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _AllWorkersScreenState extends State<AllWorkersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,20 +32,9 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),*/
           elevation: 1,
-          actions: [
-            IconButton(
-              onPressed: () {
-                showDialogMethod(context);
-              },
-              icon: Icon(
-                Icons.filter_list,
-                color: Colors.pink.shade800,
-              ),
-            )
-          ],
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           title: Text(
-            'Tasks',
+            'All Workers',
             style: TextStyle(color: Colors.pink.shade800),
           ),
         ),
@@ -55,15 +43,15 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, index) {
               return TaskWidget(
                 imageUrl:
-                    'https://cdn-icons-png.flaticon.com/512/4305/4305432.png',
-                des: 'Task des',
-                name: 'Task title',
+                    'https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1985&q=80',
+                des: 'Worker pos / Phone num',
+                name: 'Worker name',
                 icon: Icon(
-                  Icons.keyboard_arrow_right,
+                  Icons.mail,
                   size: 30.0,
                   color: Colors.pink.shade800,
                 ),
-                isTask: true,
+                isTask: false,
               );
             }));
   }

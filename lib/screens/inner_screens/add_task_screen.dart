@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:worker_tasks_app/constants.dart';
+import 'package:worker_tasks_app/helper_methods/selet_catagory.dart';
+import 'package:worker_tasks_app/helper_methods/show_category.dart';
 import 'package:worker_tasks_app/helper_methods/submit_method.dart';
 import 'package:worker_tasks_app/widgets/custem_button.dart';
 import 'package:worker_tasks_app/widgets/custem_textformfield.dart';
@@ -18,6 +20,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   TextEditingController _pickedDateController = TextEditingController();
   TextEditingController _titleController = TextEditingController();
   TextEditingController _desController = TextEditingController();
+  DateTime? picked;
   final _addTaskKey = GlobalKey<FormState>();
   @override
   void initState() {
@@ -76,11 +79,18 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   SizedBox(
                     height: 10,
                   ),
-                  CustemTextFormField(
-                    Controller: _catagoryController,
-                    hintString: 'Task Category',
-                    filledd: true,
-                    filledColor: Theme.of(context).scaffoldBackgroundColor,
+                  InkWell(
+                    onTap: () {
+                      selectCatagory(context, _catagoryController);
+                    },
+                    child: CustemTextFormField(
+                      black: true,
+                      enabeld: true,
+                      Controller: _catagoryController,
+                      hintString: 'Task Category',
+                      filledd: true,
+                      filledColor: Theme.of(context).scaffoldBackgroundColor,
+                    ),
                   ),
                   SizedBox(
                     height: 10,
@@ -93,6 +103,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     height: 10,
                   ),
                   CustemTextFormField(
+                    black: true,
                     Controller: _titleController,
                     hintString: '',
                     filledd: true,
@@ -107,6 +118,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     height: 10,
                   ),
                   CustemTextFormField(
+                    black: true,
                     Controller: _desController,
                     hintString: '',
                     filledd: true,
@@ -121,11 +133,27 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   SizedBox(
                     height: 10,
                   ),
-                  CustemTextFormField(
-                    Controller: _pickedDateController,
-                    hintString: 'Pick Up a Date',
-                    filledd: true,
-                    filledColor: Theme.of(context).scaffoldBackgroundColor,
+                  InkWell(
+                    onTap: () async {
+                      picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime.now().subtract(Duration(days: 0)),
+                          lastDate: DateTime(2030));
+                      if (picked != null) {
+                        _pickedDateController.text = '${picked!.day} - '
+                            '${picked!.month} - '
+                            '${picked!.year}  ';
+                      }
+                    },
+                    child: CustemTextFormField(
+                      black: true,
+                      enabeld: true,
+                      Controller: _pickedDateController,
+                      hintString: 'Pick Up a Date',
+                      filledd: true,
+                      filledColor: Theme.of(context).scaffoldBackgroundColor,
+                    ),
                   ),
                   SizedBox(
                     height: 40,

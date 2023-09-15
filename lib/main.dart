@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:worker_tasks_app/screens/forget_password_screen.dart';
 import 'package:worker_tasks_app/screens/home_screen.dart';
 import 'package:worker_tasks_app/screens/inner_screens/add_task_screen.dart';
+import 'package:worker_tasks_app/screens/inner_screens/all_workers.dart';
 import 'package:worker_tasks_app/screens/login_screen.dart';
 import 'package:worker_tasks_app/screens/register_screen.dart';
+import 'package:worker_tasks_app/widgets/worker_widget.dart';
 
 void main() {
   runApp(const WorkersTaskApp());
@@ -26,8 +28,10 @@ class WorkersTaskApp extends StatelessWidget {
         RegisterScreen.id: (context) => RegisterScreen(),
         HomeScreen.id: (context) => HomeScreen(),
         AddTaskScreen.id: (context) => AddTaskScreen(),
+        AllWorkersScreen.id: (context) => AllWorkersScreen(),
+        WorkerWidget.id: (context) => WorkerWidget(),
       },
-      home: LoginScreen(),
+      home: RegisterScreen(),
     );
   }
 }
