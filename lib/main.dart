@@ -4,7 +4,8 @@ import 'package:worker_tasks_app/screens/inner_screens/add_task_screen.dart';
 import 'package:worker_tasks_app/screens/inner_screens/all_workers.dart';
 import 'package:worker_tasks_app/screens/login_screen.dart';
 import 'package:worker_tasks_app/screens/register_screen.dart';
-import 'package:worker_tasks_app/widgets/worker_widget.dart';
+import 'package:worker_tasks_app/widgets/task_details.dart';
+import 'package:worker_tasks_app/widgets/worker_details_widget.dart';
 
 void main() {
   runApp(const WorkersTaskApp());
@@ -27,9 +28,10 @@ class WorkersTaskApp extends StatelessWidget {
         HomeScreen.id: (context) => HomeScreen(),
         AddTaskScreen.id: (context) => AddTaskScreen(),
         AllWorkersScreen.id: (context) => AllWorkersScreen(),
-        WorkerWidget.id: (context) => WorkerWidget(),
+        WorkerDetailsWidget.id: (context) => WorkerDetailsWidget(),
+        TaskDetailsWidget.id: (context) => TaskDetailsWidget(),
       },
-      home: LoginScreen(),
+      home: HomeScreen(),
     );
   }
 }

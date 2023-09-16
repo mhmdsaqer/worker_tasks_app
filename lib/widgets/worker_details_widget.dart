@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:worker_tasks_app/widgets/custem_rich_text.dart';
 
-class WorkerWidget extends StatefulWidget {
-  static String id = 'workersWidget';
-  const WorkerWidget({super.key});
+class WorkerDetailsWidget extends StatefulWidget {
+  static String id = 'workerDetailsWidget';
+  const WorkerDetailsWidget({super.key});
 
   @override
-  State<WorkerWidget> createState() => _WorkerWidgetState();
+  State<WorkerDetailsWidget> createState() => _WorkerDetailsWidgetState();
 }
 
-class _WorkerWidgetState extends State<WorkerWidget> {
+class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -140,38 +142,57 @@ class _WorkerWidgetState extends State<WorkerWidget> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: Colors.green,
+                                InkWell(
+                                  onTap: () async {
+                                    Uri url = Uri.parse(
+                                        'http://wa.me/5555555?text=Hello');
+                                    await launchUrl(url);
+                                  },
                                   child: CircleAvatar(
-                                      radius: 18,
-                                      backgroundColor: Colors.white,
-                                      child: Icon(
-                                        Icons.whatshot,
-                                        color: Colors.green,
-                                      )),
+                                    radius: 20,
+                                    backgroundColor: Colors.green,
+                                    child: CircleAvatar(
+                                        radius: 18,
+                                        backgroundColor: Colors.white,
+                                        child: Icon(
+                                          Icons.whatshot,
+                                          color: Colors.green,
+                                        )),
+                                  ),
                                 ),
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: Colors.red,
+                                InkWell(
+                                  onTap: () async {
+                                    Uri url = Uri.parse('mailto:xxx@gmail.com');
+                                    await launchUrl(url);
+                                  },
                                   child: CircleAvatar(
-                                      radius: 18,
-                                      backgroundColor: Colors.white,
-                                      child: Icon(
-                                        Icons.mail_outline,
-                                        color: Colors.red,
-                                      )),
+                                    radius: 20,
+                                    backgroundColor: Colors.red,
+                                    child: CircleAvatar(
+                                        radius: 18,
+                                        backgroundColor: Colors.white,
+                                        child: Icon(
+                                          Icons.mail_outline,
+                                          color: Colors.red,
+                                        )),
+                                  ),
                                 ),
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: Colors.purple,
+                                InkWell(
+                                  onTap: () async {
+                                    Uri url = Uri.parse('tel://555555');
+                                    await launchUrl(url);
+                                  },
                                   child: CircleAvatar(
-                                      radius: 18,
-                                      backgroundColor: Colors.white,
-                                      child: Icon(
-                                        Icons.call,
-                                        color: Colors.purple,
-                                      )),
+                                    radius: 20,
+                                    backgroundColor: Colors.purple,
+                                    child: CircleAvatar(
+                                        radius: 18,
+                                        backgroundColor: Colors.white,
+                                        child: Icon(
+                                          Icons.call,
+                                          color: Colors.purple,
+                                        )),
+                                  ),
                                 )
                               ],
                             ),

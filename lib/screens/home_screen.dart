@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:worker_tasks_app/widgets/drawer_widget.dart';
+import 'package:worker_tasks_app/widgets/task_details.dart';
 
 import '../helper_methods/show_category.dart';
 import '../widgets/task_widget.dart';
@@ -52,8 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: ListView.builder(
             itemCount: 10,
-            itemBuilder: (context, index) {
+            itemBuilder: (ctx, index) {
               return TaskWidget(
+                ontap: () {
+                  Navigator.pushNamed(ctx, TaskDetailsWidget.id);
+                },
                 imageUrl:
                     'https://cdn-icons-png.flaticon.com/512/4305/4305432.png',
                 des: 'Task des',
