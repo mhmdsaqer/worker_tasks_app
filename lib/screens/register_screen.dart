@@ -9,7 +9,6 @@ import 'package:worker_tasks_app/constants.dart';
 import 'package:worker_tasks_app/helper_methods/selet_catagory.dart';
 import 'package:worker_tasks_app/helper_methods/show_picture_dialog.dart';
 import 'package:worker_tasks_app/helper_methods/show_select_job.dart';
-import 'package:worker_tasks_app/screens/forget_password_screen.dart';
 import 'package:worker_tasks_app/screens/login_screen.dart';
 import 'package:worker_tasks_app/widgets/custem_button.dart';
 import 'package:worker_tasks_app/widgets/custem_rich_text.dart';
@@ -19,7 +18,7 @@ import '../helper_methods/show_picture_dialog.dart';
 import '../helper_methods/submit_method.dart';
 
 class RegisterScreen extends StatefulWidget {
-  static String id = 'loginScreen';
+  static String id = 'registerScreen';
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -112,12 +111,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                     height: size.height * 0.02,
                   ),
                   CustemRichText(
-                      aligment: Alignment.topLeft,
                       onTap: () {
                         Navigator.pushReplacementNamed(context, LoginScreen.id);
                       },
-                      text_one: 'Already have an account ? ',
-                      text_two: 'Log in'),
+                      text_one: 'Already have an account ?',
+                      text_two: 'Log in',
+                      aligment: Alignment.topLeft),
                   SizedBox(
                     height: size.height * 0.02,
                   ),

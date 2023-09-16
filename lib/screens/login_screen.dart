@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:worker_tasks_app/constants.dart';
 import 'package:worker_tasks_app/helper_methods/submit_method.dart';
-import 'package:worker_tasks_app/screens/forget_password_screen.dart';
+
 import 'package:worker_tasks_app/screens/register_screen.dart';
 import 'package:worker_tasks_app/widgets/custem_button.dart';
 import 'package:worker_tasks_app/widgets/custem_rich_text.dart';
 import 'package:worker_tasks_app/widgets/custem_textformfield.dart';
+
+import '../helper_methods/show_forgetpass.dart';
 
 class LoginScreen extends StatefulWidget {
   static String id = 'loginScreen';
@@ -23,17 +25,23 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<double> _animation;
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passController = TextEditingController();
+  TextEditingController _forgetPassController = TextEditingController();
+
   FocusNode submitNode = FocusNode();
 
   FocusNode emailNode = FocusNode();
   FocusNode passNode = FocusNode();
 
   final _loginKey = GlobalKey<FormState>();
+  final _forgetpassKey = GlobalKey<FormState>();
+
   @override
   void dispose() {
     _animationController.dispose();
     _emailController.dispose();
     _passController.dispose();
+    _forgetPassController.dispose();
+
     emailNode.dispose();
     passNode.dispose();
     submitNode.dispose();
@@ -96,7 +104,8 @@ class _LoginScreenState extends State<LoginScreen>
                   CustemRichText(
                       aligment: Alignment.topLeft,
                       onTap: () {
-                        Navigator.pushNamed(context, RegisterScreen.id);
+                        Navigator.pushReplacementNamed(
+                            context, RegisterScreen.id);
                       },
                       text_one: 'Don\'t have an account ? ',
                       text_two: 'Register'),
@@ -137,7 +146,8 @@ class _LoginScreenState extends State<LoginScreen>
                   CustemRichText(
                       aligment: Alignment.bottomRight,
                       onTap: () {
-                        Navigator.pushNamed(context, ForgetPasswordScreen.id!);
+                        showPassWidget(
+                            context, _forgetPassController, _forgetpassKey);
                       },
                       text_one: 'Forget your password ? ',
                       text_two: 'Click Here'),
