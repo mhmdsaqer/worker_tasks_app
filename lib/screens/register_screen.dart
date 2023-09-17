@@ -7,6 +7,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:worker_tasks_app/constants.dart';
 import 'package:worker_tasks_app/helper_methods/selet_catagory.dart';
+import 'package:worker_tasks_app/helper_methods/show_pic_options.dart';
 import 'package:worker_tasks_app/helper_methods/show_select_job.dart';
 import 'package:worker_tasks_app/screens/login_screen.dart';
 import 'package:worker_tasks_app/widgets/custem_button.dart';
@@ -32,7 +33,6 @@ class _RegisterScreenState extends State<RegisterScreen>
   TextEditingController _phoneController = TextEditingController();
   TextEditingController _imageController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
-  //PickedFile? imageFile;
   File? imageFile;
   FocusNode? emailNode = FocusNode();
   FocusNode? passNode = FocusNode();
@@ -55,6 +55,12 @@ class _RegisterScreenState extends State<RegisterScreen>
     posNode!.dispose();
 
     super.dispose();
+  }
+
+  void updateImage(File newImage) {
+    setState(() {
+      imageFile = newImage;
+    });
   }
 
   @override
@@ -141,7 +147,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                             Flexible(
                               child: InkWell(
                                 onTap: () {
-                                  showPicDialogg(context);
+                                  // showPicDialogg(context);
+                                  showPicOptions(
+                                      context, imageFile, updateImage);
                                 },
                                 child: Stack(
                                   children: [
@@ -258,90 +266,5 @@ class _RegisterScreenState extends State<RegisterScreen>
         ],
       ),
     );
-  }
-
-  Future<dynamic> showPicDialogg(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            'Choose',
-            style: fieldNameStyle,
-          ),
-          content: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            child: SingleChildScrollView(
-                child: Column(
-              children: [
-                InkWell(
-                  onTap: () {
-                    _getImageFromGallery();
-                    Navigator.pop(context);
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.photo,
-                        color: Colors.pink.shade800,
-                      ),
-                      SizedBox(
-                        width: 8,
-                      ),
-                      Text('Gallary', style: fieldNameStyle)
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-                InkWell(
-                  onTap: () {
-                    _getImageFromCamera();
-                    Navigator.pop(context);
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.camera,
-                        color: Colors.pink.shade800,
-                      ),
-                      SizedBox(
-                        width: 8,
-                      ),
-                      Text('Camera', style: fieldNameStyle)
-                    ],
-                  ),
-                )
-              ],
-            )),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _getImageFromCamera() async {
-    final pickedFile = await _picker.getImage(source: ImageSource.camera);
-
-    if (pickedFile != null) {
-      _getimageCropper(pickedFile!.path);
-    }
-  }
-
-  Future<void> _getImageFromGallery() async {
-    final pickedFile = await _picker.getImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      _getimageCropper(pickedFile!.path);
-    }
-  }
-
-  Future<void> _getimageCropper(pickedFilePath) async {
-    final croppedImage = await ImageCropper().cropImage(
-        sourcePath: pickedFilePath!, maxHeight: 1080, maxWidth: 1080);
-
-    setState(() {
-      imageFile = croppedImage!;
-    });
   }
 }
