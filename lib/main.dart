@@ -31,7 +31,7 @@ class WorkersTaskApp extends StatelessWidget {
         WorkerDetailsWidget.id: (context) => WorkerDetailsWidget(),
         TaskDetailsWidget.id: (context) => TaskDetailsWidget(),
       },
-      home: HomeScreen(),
+      home: LoginScreen(),
     );
   }
 }

@@ -2,19 +2,16 @@ import 'dart:io';
 import 'package:cross_file_image/cross_file_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:worker_tasks_app/constants.dart';
 import 'package:worker_tasks_app/helper_methods/selet_catagory.dart';
-import 'package:worker_tasks_app/helper_methods/show_picture_dialog.dart';
 import 'package:worker_tasks_app/helper_methods/show_select_job.dart';
 import 'package:worker_tasks_app/screens/login_screen.dart';
 import 'package:worker_tasks_app/widgets/custem_button.dart';
 import 'package:worker_tasks_app/widgets/custem_rich_text.dart';
 import 'package:worker_tasks_app/widgets/custem_textformfield.dart';
-
-import '../helper_methods/show_picture_dialog.dart';
 import '../helper_methods/submit_method.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -34,6 +31,8 @@ class _RegisterScreenState extends State<RegisterScreen>
   TextEditingController _posController = TextEditingController();
   TextEditingController _phoneController = TextEditingController();
   TextEditingController _imageController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
+  //PickedFile? imageFile;
   File? imageFile;
   FocusNode? emailNode = FocusNode();
   FocusNode? passNode = FocusNode();
@@ -85,7 +84,6 @@ class _RegisterScreenState extends State<RegisterScreen>
     return Scaffold(
       body: Stack(
         children: [
-          //for the image in the background
           CachedNetworkImage(
             imageUrl:
                 "https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
@@ -141,34 +139,28 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   hintString: 'Full Name'),
                             ),
                             Flexible(
-                              flex: 1,
                               child: InkWell(
                                 onTap: () {
-                                  showPicDialog(context, imageFile);
+                                  showPicDialogg(context);
                                 },
                                 child: Stack(
                                   children: [
                                     Container(
+                                      height: 80,
+                                      width: 80,
                                       decoration: BoxDecoration(
                                           border: Border.all(
-                                              width: 5, color: Colors.white),
+                                              width: 1, color: Colors.white),
                                           borderRadius:
-                                              BorderRadius.circular(15)),
-                                      child: ClipRect(
-                                        child: imageFile == null
-                                            ? Image(
-                                                height: 80,
-                                                width: 80,
-                                                fit: BoxFit.fill,
-                                                image: NetworkImage(
-                                                    'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg'))
-                                            : Image(
-                                                height: 80,
-                                                width: 80,
-                                                fit: BoxFit.fill,
-                                                image: FileImage(imageFile!),
-                                              ),
-                                      ),
+                                              BorderRadius.circular(16)),
+                                      child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          child: imageFile == null
+                                              ? Image.network(
+                                                  'https://1fid.com/wp-content/uploads/2022/06/no-profile-picture-2-1024x1024.jpg')
+                                              : Image.file(
+                                                  File(imageFile!.path))),
                                     ),
                                     Positioned(
                                         top: 0,
@@ -206,7 +198,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                             onEditing: () {
                               FocusScope.of(context).requestFocus(posNode);
                             },
-                            txtInputAction: TextInputAction.done,
+                            txtInputAction: TextInputAction.next,
                             focusNodee: passNode,
                             Controller: _passController,
                             inputType: TextInputType.visiblePassword,
@@ -243,21 +235,22 @@ class _RegisterScreenState extends State<RegisterScreen>
                         SizedBox(
                           height: size.height * 0.02,
                         ),
+                        SizedBox(
+                          height: size.height * 0.1,
+                        ),
+                        CustemButton(
+                          text: "Register",
+                          onPressed: () {
+                            submitMethod(context, _registerKey);
+                          },
+                          icon: Icon(
+                            Icons.new_label,
+                            color: Colors.white,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: size.height * 0.1,
-                  ),
-                  CustemButton(
-                      text: "Register",
-                      onPressed: () {
-                        submitMethod(context, _registerKey);
-                      },
-                      icon: Icon(
-                        Icons.new_label,
-                        color: Colors.white,
-                      ))
                 ],
               ),
             ),
@@ -265,5 +258,90 @@ class _RegisterScreenState extends State<RegisterScreen>
         ],
       ),
     );
+  }
+
+  Future<dynamic> showPicDialogg(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'Choose',
+            style: fieldNameStyle,
+          ),
+          content: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: SingleChildScrollView(
+                child: Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    _getImageFromGallery();
+                    Navigator.pop(context);
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.photo,
+                        color: Colors.pink.shade800,
+                      ),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      Text('Gallary', style: fieldNameStyle)
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                InkWell(
+                  onTap: () {
+                    _getImageFromCamera();
+                    Navigator.pop(context);
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.camera,
+                        color: Colors.pink.shade800,
+                      ),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      Text('Camera', style: fieldNameStyle)
+                    ],
+                  ),
+                )
+              ],
+            )),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _getImageFromCamera() async {
+    final pickedFile = await _picker.getImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      _getimageCropper(pickedFile!.path);
+    }
+  }
+
+  Future<void> _getImageFromGallery() async {
+    final pickedFile = await _picker.getImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      _getimageCropper(pickedFile!.path);
+    }
+  }
+
+  Future<void> _getimageCropper(pickedFilePath) async {
+    final croppedImage = await ImageCropper().cropImage(
+        sourcePath: pickedFilePath!, maxHeight: 1080, maxWidth: 1080);
+
+    setState(() {
+      imageFile = croppedImage!;
+    });
   }
 }
