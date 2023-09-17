@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:worker_tasks_app/constants.dart';
 import 'package:worker_tasks_app/helper_methods/submit_method.dart';
+import 'package:worker_tasks_app/screens/home_screen.dart';
 
 import 'package:worker_tasks_app/screens/register_screen.dart';
 import 'package:worker_tasks_app/widgets/custem_button.dart';
@@ -26,12 +28,11 @@ class _LoginScreenState extends State<LoginScreen>
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passController = TextEditingController();
   TextEditingController _forgetPassController = TextEditingController();
-
   FocusNode submitNode = FocusNode();
-
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   FocusNode emailNode = FocusNode();
   FocusNode passNode = FocusNode();
-
+  bool isLoding = false;
   final _loginKey = GlobalKey<FormState>();
   final _forgetpassKey = GlobalKey<FormState>();
 
@@ -41,7 +42,6 @@ class _LoginScreenState extends State<LoginScreen>
     _emailController.dispose();
     _passController.dispose();
     _forgetPassController.dispose();
-
     emailNode.dispose();
     passNode.dispose();
     submitNode.dispose();
@@ -155,9 +155,34 @@ class _LoginScreenState extends State<LoginScreen>
                     height: size.height * 0.05,
                   ),
                   CustemButton(
+                      isLoding: isLoding,
                       text: "Login",
-                      onPressed: () {
-                        submitMethod(context, _loginKey);
+                      onPressed: () async {
+                        bool isValid = submitMethod(context, _loginKey);
+                        if (isValid) {
+                          setState(() {
+                            isLoding = true;
+                          });
+                          try {
+                            await _auth.signInWithEmailAndPassword(
+                                email:
+                                    _emailController.text.toLowerCase().trim(),
+                                password: _passController.text.trim());
+
+                            Navigator.canPop(context)
+                                ? Navigator.pop(context)
+                                : Navigator.pushReplacementNamed(
+                                    context, HomeScreen.id);
+                          } catch (ex) {
+                            var snakBar = SnackBar(
+                              content: Text('$ex'),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(snakBar);
+                          }
+                        }
+                        setState(() {
+                          isLoding = false;
+                        });
                       },
                       icon: Icon(
                         Icons.login,

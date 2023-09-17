@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "428761576326",
+    "project_id": "workertasks-bb849",
+    "storage_bucket": "workertasks-bb849.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:428761576326:android:9ea0e7afe91597580df207",
+        "android_client_info": {
+          "package_name": "com.example.worker_tasks_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDd9Xr5b2dtaJ8ty1je1NruHAneaqRZVTs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

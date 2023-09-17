@@ -8,7 +8,7 @@ import 'package:worker_tasks_app/widgets/inkwell_drawer_banners.dart';
 import 'package:worker_tasks_app/widgets/worker_details_widget.dart';
 
 class DrawerWidget extends StatelessWidget {
-  const DrawerWidget({super.key});
+  bool isMe = true;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,10 @@ class DrawerWidget extends StatelessWidget {
           DrawerInkWell(
             icon: Icons.settings,
             ontap: () {
-              Navigator.pushNamed(context, WorkerDetailsWidget.id);
+              Navigator.pushNamed(
+                context,
+                WorkerDetailsWidget.id,
+              );
             },
             text: 'My Account',
           ),

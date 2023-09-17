@@ -1,17 +1,69 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:worker_tasks_app/screens/user_state.dart';
+import 'package:worker_tasks_app/widgets/custem_materialbutton.dart';
 import 'package:worker_tasks_app/widgets/custem_rich_text.dart';
 
 class WorkerDetailsWidget extends StatefulWidget {
   static String id = 'workerDetailsWidget';
-  const WorkerDetailsWidget({super.key});
+
+  WorkerDetailsWidget({super.key});
 
   @override
   State<WorkerDetailsWidget> createState() => _WorkerDetailsWidgetState();
 }
 
 class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
+  FirebaseAuth _auth = FirebaseAuth.instance;
+  bool? isLoding = false;
+  String? phoneNum = '';
+  bool? isSameUser = true;
+  String? email = '';
+  String? imageUrl = '';
+  String? name = '';
+  String? job = '';
+  String? joinedAt = '';
+  Future<void> getUserData() async {
+    isLoding = true;
+    try {
+      final DocumentSnapshot<dynamic> userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc('zsBN8MfqKChJNVUXdnTJiiXfiLH3')
+          .get();
+      if (userDoc == null) {
+        return;
+      } else {
+        setState(() {
+          email = userDoc.get('email');
+          phoneNum = userDoc.get('phoneNum');
+          imageUrl = userDoc.get('userImageUrl');
+          name = userDoc.get('name');
+          Timestamp joinedDate = userDoc.get('createdAt');
+          final joined = joinedDate.toDate();
+          joinedAt = '${joined.day}-${joined.month}-${joined.year}';
+          job = userDoc.get('pos');
+        });
+        // String? uid = _auth.currentUser!.uid;
+      }
+    } catch (ex) {
+      print('$ex');
+    } finally {
+      setState(() {
+        isLoding = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUserData();
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -47,7 +99,7 @@ class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
                       height: 80,
                     ),
                     Text(
-                      'Worker name',
+                      name!,
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
@@ -55,7 +107,7 @@ class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
                       height: 20,
                     ),
                     Text(
-                      'Pos Since Date ',
+                      joinedAt!,
                       style: TextStyle(
                           fontSize: 14, fontWeight: FontWeight.normal),
                     ),
@@ -100,7 +152,7 @@ class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
                                   width: 8,
                                 ),
                                 Text(
-                                  'xx@gmail.com ',
+                                  email!,
                                   style: TextStyle(
                                       color: Colors.blue,
                                       fontSize: 14,
@@ -124,7 +176,7 @@ class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
                                   width: 8,
                                 ),
                                 Text(
-                                  '+1548791',
+                                  phoneNum!,
                                   style: TextStyle(
                                       color: Colors.blue,
                                       fontSize: 14,
@@ -139,63 +191,83 @@ class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
                             SizedBox(
                               height: 20,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                InkWell(
-                                  onTap: () async {
-                                    Uri url = Uri.parse(
-                                        'http://wa.me/5555555?text=Hello');
-                                    await launchUrl(url);
-                                  },
-                                  child: CircleAvatar(
-                                    radius: 20,
-                                    backgroundColor: Colors.green,
-                                    child: CircleAvatar(
-                                        radius: 18,
-                                        backgroundColor: Colors.white,
-                                        child: Icon(
-                                          Icons.whatshot,
-                                          color: Colors.green,
-                                        )),
+                            !isSameUser!
+                                ? Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      InkWell(
+                                        onTap: () async {
+                                          Uri url = Uri.parse(
+                                              'http://wa.me/$phoneNum?text=Hello');
+                                          await launchUrl(url);
+                                        },
+                                        child: CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: Colors.green,
+                                          child: CircleAvatar(
+                                              radius: 18,
+                                              backgroundColor: Colors.white,
+                                              child: Icon(
+                                                Icons.whatshot,
+                                                color: Colors.green,
+                                              )),
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () async {
+                                          Uri url = Uri.parse('mailto:$email');
+                                          await launchUrl(url);
+                                        },
+                                        child: CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: Colors.red,
+                                          child: CircleAvatar(
+                                              radius: 18,
+                                              backgroundColor: Colors.white,
+                                              child: Icon(
+                                                Icons.mail_outline,
+                                                color: Colors.red,
+                                              )),
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () async {
+                                          Uri url =
+                                              Uri.parse('tel://$phoneNum');
+                                          await launchUrl(url);
+                                        },
+                                        child: CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: Colors.purple,
+                                          child: CircleAvatar(
+                                              radius: 18,
+                                              backgroundColor: Colors.white,
+                                              child: Icon(
+                                                Icons.call,
+                                                color: Colors.purple,
+                                              )),
+                                        ),
+                                      )
+                                    ],
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CustemMaterialButton(
+                                          text: 'Log out',
+                                          buttonColor: Colors.pink.shade800,
+                                          textColor: Colors.white,
+                                          onPressed: () {
+                                            _auth.signOut();
+                                            Navigator.canPop(context)
+                                                ? Navigator.pop(context)
+                                                : null;
+                                            Navigator.pushReplacementNamed(
+                                                context, UserStateScreen.id);
+                                          })
+                                    ],
                                   ),
-                                ),
-                                InkWell(
-                                  onTap: () async {
-                                    Uri url = Uri.parse('mailto:xxx@gmail.com');
-                                    await launchUrl(url);
-                                  },
-                                  child: CircleAvatar(
-                                    radius: 20,
-                                    backgroundColor: Colors.red,
-                                    child: CircleAvatar(
-                                        radius: 18,
-                                        backgroundColor: Colors.white,
-                                        child: Icon(
-                                          Icons.mail_outline,
-                                          color: Colors.red,
-                                        )),
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () async {
-                                    Uri url = Uri.parse('tel://555555');
-                                    await launchUrl(url);
-                                  },
-                                  child: CircleAvatar(
-                                    radius: 20,
-                                    backgroundColor: Colors.purple,
-                                    child: CircleAvatar(
-                                        radius: 18,
-                                        backgroundColor: Colors.white,
-                                        child: Icon(
-                                          Icons.call,
-                                          color: Colors.purple,
-                                        )),
-                                  ),
-                                )
-                              ],
-                            ),
                             SizedBox(
                               height: 30,
                             )
@@ -218,9 +290,8 @@ class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
                           border: Border.all(
                               width: 5,
                               color: Theme.of(context).scaffoldBackgroundColor),
-                          image: DecorationImage(
-                              image: NetworkImage(
-                                  'https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1985&q=80'))),
+                          image:
+                              DecorationImage(image: NetworkImage(imageUrl!))),
                     )
                   ],
                 ),

@@ -1,6 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:worker_tasks_app/screens/user_state.dart';
+
+import '../screens/login_screen.dart';
 
 Future<dynamic> logOutMethod(BuildContext context) {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   return showDialog(
       context: context,
       builder: (context) {
@@ -34,7 +39,9 @@ Future<dynamic> logOutMethod(BuildContext context) {
             ),
             TextButton(
               onPressed: () {
-                // Navigator.pushNamed(context, LoginScreen.id);
+                _auth.signOut();
+                Navigator.canPop(context) ? Navigator.pop(context) : null;
+                Navigator.pushNamed(context, UserStateScreen.id);
               },
               child: Text(
                 'Log Out',

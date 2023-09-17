@@ -20,6 +20,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   TextEditingController _pickedDateController = TextEditingController();
   TextEditingController _titleController = TextEditingController();
   TextEditingController _desController = TextEditingController();
+  bool isLoding = false;
   DateTime? picked;
   final _addTaskKey = GlobalKey<FormState>();
   @override
@@ -161,6 +162,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 50),
                     child: CustemButton(
+                        isLoding: isLoding,
                         icon: Icon(Icons.upload),
                         text: 'Upload',
                         onPressed: () {

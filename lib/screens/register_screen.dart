@@ -1,5 +1,8 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cross_file_image/cross_file_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -9,7 +12,9 @@ import 'package:worker_tasks_app/constants.dart';
 import 'package:worker_tasks_app/helper_methods/selet_catagory.dart';
 import 'package:worker_tasks_app/helper_methods/show_pic_options.dart';
 import 'package:worker_tasks_app/helper_methods/show_select_job.dart';
+import 'package:worker_tasks_app/screens/home_screen.dart';
 import 'package:worker_tasks_app/screens/login_screen.dart';
+import 'package:worker_tasks_app/screens/user_state.dart';
 import 'package:worker_tasks_app/widgets/custem_button.dart';
 import 'package:worker_tasks_app/widgets/custem_rich_text.dart';
 import 'package:worker_tasks_app/widgets/custem_textformfield.dart';
@@ -39,6 +44,9 @@ class _RegisterScreenState extends State<RegisterScreen>
   FocusNode? fullnameNode = FocusNode();
   FocusNode? posNode = FocusNode();
   FocusNode? phoneNode = FocusNode();
+  bool isLoding = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  String? url;
   final _registerKey = GlobalKey<FormState>();
   @override
   void dispose() {
@@ -147,7 +155,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                             Flexible(
                               child: InkWell(
                                 onTap: () {
-                                  // showPicDialogg(context);
                                   showPicOptions(
                                       context, imageFile, updateImage);
                                 },
@@ -247,9 +254,76 @@ class _RegisterScreenState extends State<RegisterScreen>
                           height: size.height * 0.1,
                         ),
                         CustemButton(
+                          isLoding: isLoding,
                           text: "Register",
-                          onPressed: () {
-                            submitMethod(context, _registerKey);
+                          onPressed: () async {
+                            bool isValid = submitMethod(context, _registerKey);
+                            if (isValid) {
+                              if (imageFile == null) {
+                                var snakBar = SnackBar(
+                                  content: Text(
+                                    'Please choose a Profile Photo',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                );
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snakBar);
+                                return;
+                              }
+                              setState(() {
+                                isLoding = true;
+                              });
+                              try {
+                                await _auth.createUserWithEmailAndPassword(
+                                    email: _emailController.text
+                                        .toLowerCase()
+                                        .trim(),
+                                    password: _passController.text.trim());
+                                final User? user = _auth.currentUser;
+                                final uid = user!.uid;
+                                final ref = FirebaseStorage.instance
+                                    .ref()
+                                    .child('usersImages')
+                                    .child(uid + 'jpg');
+                                await ref.putFile(imageFile!);
+                                url = await ref.getDownloadURL();
+                                await FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc('Id')
+                                    .set({
+                                  'id': uid,
+                                  'userImageUrl': url,
+                                  'name': _fullnameController.text,
+                                  'email': _emailController.text,
+                                  'pass': _passController.text,
+                                  'phoneNum': _phoneController.text,
+                                  'pos': _posController.text,
+                                  'ceratedAt': Timestamp.now(),
+                                });
+
+                                Navigator.canPop(context)
+                                    ? Navigator.pop(context)
+                                    : Navigator.pushReplacementNamed(
+                                        context, UserStateScreen.id);
+                                var snakBar = SnackBar(
+                                  content: Text(
+                                    'Succssesfully , Please Log in ',
+                                    style: TextStyle(color: Colors.green),
+                                  ),
+                                );
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snakBar);
+                              } catch (ex) {
+                                var snakBar = SnackBar(
+                                  content: Text('$ex'),
+                                );
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snakBar);
+                              }
+                            }
+                            setState(() {
+                              isLoding = false;
+                            });
                           },
                           icon: Icon(
                             Icons.new_label,
