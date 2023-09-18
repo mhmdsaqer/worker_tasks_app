@@ -48,8 +48,6 @@ class WorkersTaskApp extends StatelessWidget {
               HomeScreen.id: (context) => HomeScreen(),
               AddTaskScreen.id: (context) => AddTaskScreen(),
               AllWorkersScreen.id: (context) => AllWorkersScreen(),
-              WorkerDetailsWidget.id: (context) => WorkerDetailsWidget(),
-              TaskDetailsWidget.id: (context) => TaskDetailsWidget(),
               UserStateScreen.id: (context) => UserStateScreen(),
             },
             home: UserStateScreen(),

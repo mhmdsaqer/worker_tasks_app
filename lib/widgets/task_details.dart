@@ -1,20 +1,106 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:worker_tasks_app/widgets/comment_widget.dart';
 import 'package:worker_tasks_app/widgets/custem_materialbutton.dart';
 import 'package:worker_tasks_app/widgets/custem_rich_text.dart';
 
 class TaskDetailsWidget extends StatefulWidget {
+  FirebaseAuth _auth = FirebaseAuth.instance;
   static String id = 'taskDetailsWidget';
+  final String? userUploded;
+  final String? taskid;
 
-  TaskDetailsWidget({super.key});
+  TaskDetailsWidget(
+      {super.key, @required this.taskid, @required this.userUploded});
 
   @override
   State<TaskDetailsWidget> createState() => _TaskDetailsWidgetState();
 }
 
 class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
+  bool? isLoding = false;
+  bool? isDone = false;
+  String? taskTitle = '';
+  String? taskDescription = '';
+  String? userImageUrl;
+  String? userPos = '';
+  String? userName = '';
+  Timestamp? uploadedOnTimeStamp;
+  Timestamp? deadlineDateTimeStamp;
+  String? deadlineDate = '';
+  String? postedDate = '';
+  String? commenterName = '';
+  String? commenterImageUrl = '';
+  bool? isDeadline_ok = false;
+  bool? canChange = false;
+  TextEditingController? _commentController = TextEditingController();
+  List<String> taskComments = [];
+  Future<void> getTaskData() async {
+    isLoding = true;
+    try {
+      final DocumentSnapshot<dynamic> taskDoc = await FirebaseFirestore.instance
+          .collection('tasks')
+          .doc(widget.taskid)
+          .get();
+      if (taskDoc == null) {
+        return;
+      } else {
+        setState(() {
+          taskTitle = taskDoc.get('taskTitle');
+          taskDescription = taskDoc.get('taskDescription');
+          uploadedOnTimeStamp = taskDoc.get('createdAt');
+          var uploded = uploadedOnTimeStamp!.toDate();
+          postedDate = '${uploded.day}-${uploded.month}-${uploded.year}';
+          deadlineDate = taskDoc.get('deadlineDate');
+          deadlineDateTimeStamp = taskDoc.get('deadlinedateTimestamp');
+          isDone = taskDoc.get('isDone');
+          var date = deadlineDateTimeStamp!.toDate();
+          isDeadline_ok = date.isAfter(DateTime.now());
+        });
+      }
+
+      final DocumentSnapshot<dynamic> userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc('${widget.userUploded}')
+          .get();
+      setState(() {
+        userName = userDoc.get('name');
+        userPos = userDoc.get('pos');
+        userImageUrl = userDoc.get('userImageUrl');
+      });
+      final DocumentSnapshot<dynamic> commenterDoc = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc('${widget._auth.currentUser!.uid}')
+          .get();
+      setState(() {
+        commenterName = commenterDoc.get('name');
+        commenterImageUrl = commenterDoc.get('userImageUrl');
+      });
+    } catch (ex) {
+      print('$ex');
+    } finally {
+      setState(() {
+        isLoding = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _commentController!.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getTaskData();
+  }
+
   bool isComment = false;
-  bool isDone = false;
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -39,7 +125,7 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
               height: size.height * 0.03,
             ),
             Text(
-              'Task Title',
+              taskTitle!,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
             ),
             SizedBox(
@@ -74,10 +160,12 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                               decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                      width: 5, color: Colors.pink.shade800),
+                                      width: 3, color: Colors.pink.shade800),
                                   image: DecorationImage(
-                                      image: NetworkImage(
-                                          'https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1985&q=80'))),
+                                      image: userImageUrl == null
+                                          ? NetworkImage(
+                                              'https://1fid.com/wp-content/uploads/2022/06/no-profile-picture-2-1024x1024.jpg')
+                                          : NetworkImage(userImageUrl!))),
                             ),
                             SizedBox(
                               width: 8,
@@ -86,7 +174,7 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Worker name',
+                                  userName!,
                                   style: TextStyle(
                                       color: Colors.blue.shade800,
                                       fontWeight: FontWeight.bold),
@@ -95,7 +183,7 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                                   height: 3,
                                 ),
                                 Text(
-                                  'Worker Pos',
+                                  userPos!,
                                   style:
                                       TextStyle(fontWeight: FontWeight.normal),
                                 ),
@@ -122,7 +210,10 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                        Text('8-7-2021'),
+                        Text(postedDate!,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
                       ],
                     ),
                     SizedBox(
@@ -137,7 +228,7 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '8-7-2021',
+                          deadlineDate!,
                           style: TextStyle(
                               color: Colors.red, fontWeight: FontWeight.bold),
                         ),
@@ -148,13 +239,21 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                     ),
                     Align(
                       alignment: Alignment.center,
-                      child: Text(
-                        'Still have time',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green),
-                      ),
+                      child: isDeadline_ok!
+                          ? Text(
+                              'Still have time',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green),
+                            )
+                          : Text(
+                              'Ended',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red),
+                            ),
                     ),
                     SizedBox(
                       height: 8,
@@ -179,21 +278,46 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                         InkWell(
                           onTap: () {
                             setState(() {
-                              isDone = !isDone;
+                              isDone = !isDone!;
                             });
                           },
                           child: Row(
                             children: [
-                              Text(
-                                'Done',
-                                style: TextStyle(
-                                    decoration: isDone
-                                        ? TextDecoration.underline
-                                        : TextDecoration.none,
-                                    color: Colors.blue),
+                              TextButton(
+                                onPressed: () {
+                                  canChange = isCanChange(widget.userUploded!,
+                                      widget._auth.currentUser!.uid);
+                                  if (canChange!) {
+                                    FirebaseFirestore.instance
+                                        .collection('tasks')
+                                        .doc(widget.taskid)
+                                        .update({
+                                      'isDone': true,
+                                    });
+                                    getTaskData();
+                                  } else {
+                                    var snakBar = SnackBar(
+                                      backgroundColor: Colors.red,
+                                      content: Text(
+                                        'You cant change it ',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    );
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(snakBar);
+                                  }
+                                },
+                                child: Text(
+                                  'Done',
+                                  style: TextStyle(
+                                      decoration: isDone!
+                                          ? TextDecoration.underline
+                                          : TextDecoration.none,
+                                      color: Colors.blue),
+                                ),
                               ),
                               Opacity(
-                                  opacity: isDone ? 1 : 0,
+                                  opacity: isDone! ? 1 : 0,
                                   child: Icon(Icons.check_box_sharp,
                                       color: Colors.green))
                             ],
@@ -202,21 +326,46 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                         InkWell(
                           onTap: () {
                             setState(() {
-                              isDone = !isDone;
+                              isDone = !isDone!;
                             });
                           },
                           child: Row(
                             children: [
-                              Text(
-                                'Not Done Yet',
-                                style: TextStyle(
-                                    decoration: !isDone
-                                        ? TextDecoration.underline
-                                        : TextDecoration.none,
-                                    color: Colors.blue),
+                              TextButton(
+                                onPressed: () {
+                                  canChange = isCanChange(widget.userUploded!,
+                                      widget._auth.currentUser!.uid);
+                                  if (canChange!) {
+                                    FirebaseFirestore.instance
+                                        .collection('tasks')
+                                        .doc(widget.taskid)
+                                        .update({
+                                      'isDone': false,
+                                    });
+                                    getTaskData();
+                                  } else {
+                                    var snakBar = SnackBar(
+                                      backgroundColor: Colors.red,
+                                      content: Text(
+                                        'You cant change it ',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    );
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(snakBar);
+                                  }
+                                },
+                                child: Text(
+                                  'Not Done Yet',
+                                  style: TextStyle(
+                                      decoration: !isDone!
+                                          ? TextDecoration.underline
+                                          : TextDecoration.none,
+                                      color: Colors.blue),
+                                ),
                               ),
                               Opacity(
-                                  opacity: !isDone ? 1 : 0,
+                                  opacity: !isDone! ? 1 : 0,
                                   child: Icon(Icons.check_box_sharp,
                                       color: Colors.red))
                             ],
@@ -242,7 +391,7 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                       height: 20,
                     ),
                     Text(
-                      'Des',
+                      taskDescription!,
                       style: TextStyle(fontWeight: FontWeight.normal),
                     ),
                     SizedBox(
@@ -258,6 +407,7 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                                   Flexible(
                                     flex: 3,
                                     child: TextField(
+                                      controller: _commentController,
                                       keyboardType: TextInputType.text,
                                       style: TextStyle(
                                         color: Colors.black,
@@ -277,10 +427,61 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                                       child: Column(
                                         children: [
                                           CustemMaterialButton(
-                                              textColor: Colors.white,
-                                              buttonColor: Colors.pink.shade800,
-                                              text: 'Post',
-                                              onPressed: () {}),
+                                            textColor: Colors.white,
+                                            buttonColor: Colors.pink.shade800,
+                                            text: 'Post',
+                                            onPressed: () async {
+                                              if (_commentController!
+                                                      .text.length >
+                                                  7) {
+                                                var commentID = Uuid().v4();
+                                                await FirebaseFirestore.instance
+                                                    .collection('tasks')
+                                                    .doc(widget.taskid)
+                                                    .update({
+                                                  'taskComments':
+                                                      FieldValue.arrayUnion([
+                                                    {
+                                                      'commenterId': widget
+                                                          ._auth
+                                                          .currentUser!
+                                                          .uid,
+                                                      'commentId': commentID,
+                                                      'name': commenterName,
+                                                      'commentBoby':
+                                                          _commentController!
+                                                              .text,
+                                                      'time': Timestamp.now(),
+                                                      'commenterImageUrl':
+                                                          commenterImageUrl,
+                                                    }
+                                                  ])
+                                                });
+                                                _commentController!.clear();
+                                                var snakBar = await SnackBar(
+                                                  backgroundColor: Colors.green,
+                                                  content: Text(
+                                                    'Succssesfully added ',
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                                );
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(snakBar);
+                                              } else {
+                                                var snakBar = await SnackBar(
+                                                  backgroundColor: Colors.red,
+                                                  content: Text(
+                                                    'Please enter more than 7 letters ',
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                                );
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(snakBar);
+                                              }
+                                            },
+                                          ),
                                           SizedBox(
                                             height: 20,
                                           ),
@@ -314,16 +515,42 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
                     SizedBox(
                       height: 30,
                     ),
-                    ListView.separated(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          return CommentWidget();
-                        },
-                        separatorBuilder: (context, index) {
-                          return Divider(thickness: 1);
-                        },
-                        itemCount: 5),
+                    FutureBuilder(
+                      future: FirebaseFirestore.instance
+                          .collection('tasks')
+                          .doc(widget.taskid)
+                          .get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(
+                              child: CircularProgressIndicator(
+                            color: Colors.pink.shade800,
+                          ));
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          var taskData = snapshot.data!.data();
+
+                          int itemCount = taskData!['taskComments'].length;
+
+                          return ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              return CommentWidget(
+                                commentAll: taskData!['taskComments'][index],
+                                taskId: widget.taskid,
+                              );
+                            },
+                            separatorBuilder: (context, index) {
+                              return const Divider(thickness: 1);
+                            },
+                            itemCount: itemCount,
+                          );
+                        }
+                      },
+                    )
                   ],
                 ),
               ),
@@ -332,5 +559,9 @@ class _TaskDetailsWidgetState extends State<TaskDetailsWidget> {
         ),
       ),
     );
+  }
+
+  bool isCanChange(String uplodedId, String currentId) {
+    return uplodedId == currentId;
   }
 }

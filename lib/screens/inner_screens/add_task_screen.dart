@@ -1,9 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:uuid/uuid.dart';
 import 'package:worker_tasks_app/constants.dart';
 import 'package:worker_tasks_app/helper_methods/selet_catagory.dart';
 import 'package:worker_tasks_app/helper_methods/show_category.dart';
 import 'package:worker_tasks_app/helper_methods/submit_method.dart';
 import 'package:worker_tasks_app/widgets/custem_button.dart';
+import 'package:worker_tasks_app/widgets/custem_materialbutton.dart';
 import 'package:worker_tasks_app/widgets/custem_textformfield.dart';
 import 'package:worker_tasks_app/widgets/drawer_widget.dart';
 
@@ -22,6 +27,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   TextEditingController _desController = TextEditingController();
   bool isLoding = false;
   DateTime? picked;
+  Timestamp? deadlineTimestamp;
   final _addTaskKey = GlobalKey<FormState>();
   @override
   void initState() {
@@ -139,9 +145,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                       picked = await showDatePicker(
                           context: context,
                           initialDate: DateTime.now(),
-                          firstDate: DateTime.now().subtract(Duration(days: 0)),
+                          firstDate: DateTime.now().subtract(Duration(days: 5)),
                           lastDate: DateTime(2030));
                       if (picked != null) {
+                        deadlineTimestamp =
+                            Timestamp.fromMicrosecondsSinceEpoch(
+                                picked!.microsecondsSinceEpoch);
                         _pickedDateController.text = '${picked!.day} - '
                             '${picked!.month} - '
                             '${picked!.year}  ';
@@ -159,18 +168,65 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   SizedBox(
                     height: 40,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 50),
-                    child: CustemButton(
-                        isLoding: isLoding,
-                        icon: Icon(Icons.upload),
-                        text: 'Upload',
-                        onPressed: () {
-                          submitMethod(context, _addTaskKey);
-                        }),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      !isLoding
+                          ? CustemMaterialButton(
+                              text: 'Upload',
+                              buttonColor: Colors.pink.shade800,
+                              textColor: Colors.white,
+                              onPressed: () async {
+                                bool isValid =
+                                    submitMethod(context, _addTaskKey);
+                                if (isValid) {
+                                  setState(() {
+                                    isLoding = true;
+                                  });
+                                  final taskId = Uuid().v4();
+                                  String userId =
+                                      FirebaseAuth.instance.currentUser!.uid;
+                                  await FirebaseFirestore.instance
+                                      .collection('tasks')
+                                      .doc('$taskId')
+                                      .set({
+                                    'taskId': taskId,
+                                    'createdAt': Timestamp.now(),
+                                    'uploadedBy': userId,
+                                    'taskTitle': _titleController.text,
+                                    'taskDescription': _desController.text,
+                                    'deadlineDate': _pickedDateController.text,
+                                    'deadlinedateTimestamp': deadlineTimestamp,
+                                    'taskCategory': _catagoryController.text,
+                                    'taskComments': [],
+                                    'isDone': false,
+                                  });
+                                  setState(() {
+                                    isLoding = false;
+
+                                    _catagoryController.clear();
+                                    _titleController.clear();
+                                    _desController.clear();
+                                    _pickedDateController.clear();
+                                  });
+                                  Fluttertoast.showToast(
+                                      msg: "Task created sucssefully",
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      //gravity: ToastGravity.CENTER,
+                                      //timeInSecForIosWeb: 1,
+                                      // backgroundColor: Colors.green,
+                                      //textColor: Colors.white,
+                                      fontSize: 16.0);
+                                }
+                              })
+                          : Center(
+                              child: CircularProgressIndicator(
+                                  color: Colors.pink.shade800),
+                            ),
+                    ],
                   ),
                   SizedBox(
-                    height: 50,
+                    height: 30,
                   ),
                 ],
               ),

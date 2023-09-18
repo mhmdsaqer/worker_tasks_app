@@ -4,14 +4,15 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:worker_tasks_app/helper_methods/log_out_method.dart';
 import 'package:worker_tasks_app/screens/user_state.dart';
 import 'package:worker_tasks_app/widgets/custem_materialbutton.dart';
 import 'package:worker_tasks_app/widgets/custem_rich_text.dart';
 
 class WorkerDetailsWidget extends StatefulWidget {
   static String id = 'workerDetailsWidget';
-
-  WorkerDetailsWidget({super.key});
+  final String? userId;
+  WorkerDetailsWidget({super.key, this.userId});
 
   @override
   State<WorkerDetailsWidget> createState() => _WorkerDetailsWidgetState();
@@ -19,11 +20,13 @@ class WorkerDetailsWidget extends StatefulWidget {
 
 class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
   FirebaseAuth _auth = FirebaseAuth.instance;
+
   bool? isLoding = false;
   String? phoneNum = '';
-  bool? isSameUser = true;
+  bool? isSameUser;
   String? email = '';
-  String? imageUrl = '';
+  String? imageUrl =
+      'https://1fid.com/wp-content/uploads/2022/06/no-profile-picture-2-1024x1024.jpg';
   String? name = '';
   String? job = '';
   String? joinedAt = '';
@@ -32,7 +35,7 @@ class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
     try {
       final DocumentSnapshot<dynamic> userDoc = await FirebaseFirestore.instance
           .collection('users')
-          .doc('zsBN8MfqKChJNVUXdnTJiiXfiLH3')
+          .doc(widget.userId)
           .get();
       if (userDoc == null) {
         return;
@@ -47,7 +50,8 @@ class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
           joinedAt = '${joined.day}-${joined.month}-${joined.year}';
           job = userDoc.get('pos');
         });
-        // String? uid = _auth.currentUser!.uid;
+        String? uid = _auth.currentUser!.uid;
+        uid == widget.userId ? isSameUser = true : isSameUser = false;
       }
     } catch (ex) {
       print('$ex');
@@ -81,225 +85,239 @@ class _WorkerDetailsWidgetState extends State<WorkerDetailsWidget> {
                   TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 100),
-          child: Stack(
-            children: [
-              Card(
-                margin: EdgeInsets.all(30),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                elevation: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+      body: isLoding!
+          ? Center(
+              child: CircularProgressIndicator(
+                color: Colors.pink.shade800,
+              ),
+            )
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 100),
+                child: Stack(
                   children: [
-                    SizedBox(
-                      height: 80,
-                    ),
-                    Text(
-                      name!,
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Text(
-                      joinedAt!,
-                      style: TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.normal),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Divider(
-                      thickness: 1,
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 15),
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Align(
+                    Card(
+                      margin: EdgeInsets.all(30),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      elevation: 1,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 80,
+                          ),
+                          Text(
+                            name!,
+                            style: TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            '$job Since date : $joinedAt',
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Divider(
+                            thickness: 1,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(left: 15),
+                            child: Align(
                               alignment: Alignment.topLeft,
-                              child: Text(
-                                'Content Info ',
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Email: ',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                Text(
-                                  email!,
-                                  style: TextStyle(
-                                      color: Colors.blue,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.normal,
-                                      decoration: TextDecoration.underline),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Phone Number: ',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                Text(
-                                  phoneNum!,
-                                  style: TextStyle(
-                                      color: Colors.blue,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.normal,
-                                      decoration: TextDecoration.underline),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            !isSameUser!
-                                ? Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      InkWell(
-                                        onTap: () async {
-                                          Uri url = Uri.parse(
-                                              'http://wa.me/$phoneNum?text=Hello');
-                                          await launchUrl(url);
-                                        },
-                                        child: CircleAvatar(
-                                          radius: 20,
-                                          backgroundColor: Colors.green,
-                                          child: CircleAvatar(
-                                              radius: 18,
-                                              backgroundColor: Colors.white,
-                                              child: Icon(
-                                                Icons.whatshot,
-                                                color: Colors.green,
-                                              )),
-                                        ),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text(
+                                      'Content Info ',
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      InkWell(
-                                        onTap: () async {
-                                          Uri url = Uri.parse('mailto:$email');
-                                          await launchUrl(url);
-                                        },
-                                        child: CircleAvatar(
-                                          radius: 20,
-                                          backgroundColor: Colors.red,
-                                          child: CircleAvatar(
-                                              radius: 18,
-                                              backgroundColor: Colors.white,
-                                              child: Icon(
-                                                Icons.mail_outline,
-                                                color: Colors.red,
-                                              )),
-                                        ),
-                                      ),
-                                      InkWell(
-                                        onTap: () async {
-                                          Uri url =
-                                              Uri.parse('tel://$phoneNum');
-                                          await launchUrl(url);
-                                        },
-                                        child: CircleAvatar(
-                                          radius: 20,
-                                          backgroundColor: Colors.purple,
-                                          child: CircleAvatar(
-                                              radius: 18,
-                                              backgroundColor: Colors.white,
-                                              child: Icon(
-                                                Icons.call,
-                                                color: Colors.purple,
-                                              )),
-                                        ),
-                                      )
-                                    ],
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Row(
                                     children: [
-                                      CustemMaterialButton(
-                                          text: 'Log out',
-                                          buttonColor: Colors.pink.shade800,
-                                          textColor: Colors.white,
-                                          onPressed: () {
-                                            _auth.signOut();
-                                            Navigator.canPop(context)
-                                                ? Navigator.pop(context)
-                                                : null;
-                                            Navigator.pushReplacementNamed(
-                                                context, UserStateScreen.id);
-                                          })
+                                      Text(
+                                        'Email: ',
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                        width: 8,
+                                      ),
+                                      Text(
+                                        email!,
+                                        style: TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.normal,
+                                            decoration:
+                                                TextDecoration.underline),
+                                      ),
                                     ],
                                   ),
-                            SizedBox(
-                              height: 30,
-                            )
-                          ],
-                        ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Phone Number: ',
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                        width: 8,
+                                      ),
+                                      Text(
+                                        phoneNum!,
+                                        style: TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.normal,
+                                            decoration:
+                                                TextDecoration.underline),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  !isSameUser!
+                                      ? Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            InkWell(
+                                              onTap: () async {
+                                                Uri url = Uri.parse(
+                                                    'http://wa.me/$phoneNum?text=Hello');
+                                                await launchUrl(url);
+                                              },
+                                              child: CircleAvatar(
+                                                radius: 20,
+                                                backgroundColor: Colors.green,
+                                                child: CircleAvatar(
+                                                    radius: 18,
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    child: Icon(
+                                                      Icons.whatshot,
+                                                      color: Colors.green,
+                                                    )),
+                                              ),
+                                            ),
+                                            InkWell(
+                                              onTap: () async {
+                                                Uri url =
+                                                    Uri.parse('mailto:$email');
+                                                await launchUrl(url);
+                                              },
+                                              child: CircleAvatar(
+                                                radius: 20,
+                                                backgroundColor: Colors.red,
+                                                child: CircleAvatar(
+                                                    radius: 18,
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    child: Icon(
+                                                      Icons.mail_outline,
+                                                      color: Colors.red,
+                                                    )),
+                                              ),
+                                            ),
+                                            InkWell(
+                                              onTap: () async {
+                                                Uri url = Uri.parse(
+                                                    'tel://$phoneNum');
+                                                await launchUrl(url);
+                                              },
+                                              child: CircleAvatar(
+                                                radius: 20,
+                                                backgroundColor: Colors.purple,
+                                                child: CircleAvatar(
+                                                    radius: 18,
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    child: Icon(
+                                                      Icons.call,
+                                                      color: Colors.purple,
+                                                    )),
+                                              ),
+                                            )
+                                          ],
+                                        )
+                                      : Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            CustemMaterialButton(
+                                                text: 'Log out',
+                                                buttonColor:
+                                                    Colors.pink.shade800,
+                                                textColor: Colors.white,
+                                                onPressed: () {
+                                                  logOutMethod(context);
+                                                })
+                                          ],
+                                        ),
+                                  SizedBox(
+                                    height: 30,
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 120,
+                            height: 100,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    width: 5,
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor),
+                                image: DecorationImage(
+                                    image: imageUrl == null
+                                        ? NetworkImage(
+                                            'https://1fid.com/wp-content/uploads/2022/06/no-profile-picture-2-1024x1024.jpg')
+                                        : NetworkImage(imageUrl!))),
+                          )
+                        ],
                       ),
                     )
                   ],
                 ),
               ),
-              Positioned(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 120,
-                      height: 100,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                              width: 5,
-                              color: Theme.of(context).scaffoldBackgroundColor),
-                          image:
-                              DecorationImage(image: NetworkImage(imageUrl!))),
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

@@ -1,6 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:worker_tasks_app/widgets/drawer_widget.dart';
+import 'package:worker_tasks_app/widgets/worker_details_widget.dart';
+import 'package:worker_tasks_app/widgets/worker_widget.dart';
 
+import '../../constants.dart';
 import '../../widgets/task_widget.dart';
 
 class AllWorkersScreen extends StatefulWidget {
@@ -38,22 +42,45 @@ class _AllWorkersScreenState extends State<AllWorkersScreen> {
             style: TextStyle(color: Colors.pink.shade800),
           ),
         ),
-        body: ListView.builder(
-            itemCount: 10,
-            itemBuilder: (context, index) {
-              return TaskWidget(
-                ontap: () {},
-                imageUrl:
-                    'https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1985&q=80',
-                des: 'Worker pos / Phone num',
-                name: 'Worker name',
-                icon: Icon(
-                  Icons.mail,
-                  size: 30.0,
+        body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance.collection('users').snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(
                   color: Colors.pink.shade800,
                 ),
-                isTask: false,
               );
-            }));
+            } else if (snapshot.connectionState == ConnectionState.active) {
+              if (snapshot.data!.docs.isNotEmpty) {
+                final List<QueryDocumentSnapshot> documents =
+                    snapshot.data!.docs;
+
+                return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      final data =
+                          documents[index].data() as Map<String, dynamic>;
+                      return WorkerWidget(
+                        //or  userUid: snapshot.data!.docs[index]['id'],
+                        userUid: data['id'],
+                        email: data['email'],
+                        name: data['name'],
+                        des: '${data['pos']} / ${data['phoneNum']}',
+                        imageUrl: data['userImageUrl'],
+                        icon: Icon(
+                          Icons.mail_outlined,
+                          size: 30.0,
+                          color: Colors.pink.shade800,
+                        ),
+                      );
+                    });
+              }
+            }
+            return Center(
+              child: Text('Something Went Wrong'),
+            );
+          },
+        ));
   }
 }

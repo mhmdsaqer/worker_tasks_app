@@ -289,7 +289,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 url = await ref.getDownloadURL();
                                 await FirebaseFirestore.instance
                                     .collection('users')
-                                    .doc('Id')
+                                    .doc(uid)
                                     .set({
                                   'id': uid,
                                   'userImageUrl': url,
@@ -298,7 +298,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   'pass': _passController.text,
                                   'phoneNum': _phoneController.text,
                                   'pos': _posController.text,
-                                  'ceratedAt': Timestamp.now(),
+                                  'createdAt': Timestamp.now(),
                                 });
 
                                 Navigator.canPop(context)

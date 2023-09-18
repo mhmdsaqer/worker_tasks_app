@@ -21,11 +21,6 @@ Future<dynamic> selectCatagory(
                 Navigator.canPop(context) ? Navigator.pop(context) : null;
               },
               child: Text('Close')),
-          TextButton(
-              onPressed: () {
-                Navigator.canPop(context) ? Navigator.pop(context) : null;
-              },
-              child: Text('Cancel Filter'))
         ],
         title: Text('Tasks Categorys'),
         content: Container(

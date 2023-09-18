@@ -41,7 +41,7 @@ Future<dynamic> logOutMethod(BuildContext context) {
               onPressed: () {
                 _auth.signOut();
                 Navigator.canPop(context) ? Navigator.pop(context) : null;
-                Navigator.pushNamed(context, UserStateScreen.id);
+                Navigator.pushReplacementNamed(context, UserStateScreen.id);
               },
               child: Text(
                 'Log Out',

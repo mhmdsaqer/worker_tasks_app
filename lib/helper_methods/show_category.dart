@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants.dart';
 
-Future<dynamic> showDialogMethod(BuildContext context) {
+Future<dynamic> showCategoriesMethod(BuildContext context) {
   return showDialog(
     context: context,
     builder: (context) {

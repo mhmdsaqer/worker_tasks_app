@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:worker_tasks_app/widgets/drawer_widget.dart';
 import 'package:worker_tasks_app/widgets/task_details.dart';
@@ -37,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             IconButton(
               onPressed: () {
-                showDialogMethod(context);
+                showCategoriesMethod(context);
               },
               icon: Icon(
                 Icons.filter_list,
@@ -51,24 +52,62 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(color: Colors.pink.shade800),
           ),
         ),
-        body: ListView.builder(
-            itemCount: 10,
-            itemBuilder: (ctx, index) {
-              return TaskWidget(
-                ontap: () {
-                  Navigator.pushNamed(ctx, TaskDetailsWidget.id);
-                },
-                imageUrl:
-                    'https://cdn-icons-png.flaticon.com/512/4305/4305432.png',
-                des: 'Task des',
-                name: 'Task title',
-                icon: Icon(
-                  Icons.keyboard_arrow_right,
-                  size: 30.0,
+        body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance.collection('tasks').snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(
                   color: Colors.pink.shade800,
                 ),
-                isTask: true,
               );
-            }));
+            } else if (snapshot.connectionState == ConnectionState.active) {
+              final List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
+              return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    final data =
+                        documents[index].data() as Map<String, dynamic>;
+                    return TaskWidget(
+                      userUploded: data['uploadedBy'],
+                      taskID: data['taskId'],
+                      taskTi: data['taskTitle'],
+                      ontap: () {},
+                      taskDes: data['taskDescription'],
+                      isDone: data['isDone'],
+                      icon: Icon(
+                        Icons.keyboard_arrow_right,
+                        size: 30.0,
+                        color: Colors.pink.shade800,
+                      ),
+                    );
+                  });
+            }
+            return Center(
+              child: Text('there is no tasks'),
+            );
+          },
+        )
+
+        /* ListView.builder(
+        itemCount: 10,
+        itemBuilder: (ctx, index) {
+          return TaskWidget(
+            ontap: () {
+              Navigator.pushNamed(ctx, TaskDetailsWidget.id);
+            },
+            imageUrl: 'https://cdn-icons-png.flaticon.com/512/4305/4305432.png',
+            des: 'Task des',
+            name: 'Task title',
+            icon: Icon(
+              Icons.keyboard_arrow_right,
+              size: 30.0,
+              color: Colors.pink.shade800,
+            ),
+            isTask: true,
+          );
+        },
+      ),*/
+        );
   }
 }
