@@ -1,20 +1,33 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:worker_tasks_app/widgets/drawer_widget.dart';
-import 'package:worker_tasks_app/widgets/task_details.dart';
-
 import '../helper_methods/show_category.dart';
 import '../widgets/task_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
+  bool? isFiltering = false;
   static String id = 'homeScreen';
+  String? tasksCategory;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  void getCat(String tasks) {
+    setState(() {
+      widget.tasksCategory = tasks;
+    });
+  }
+
+  void getFilter(bool filter) {
+    setState(() {
+      widget.isFiltering = filter;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,7 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             IconButton(
               onPressed: () {
-                showCategoriesMethod(context);
+                showCategoriesMethod(context, getCat, getFilter);
+                widget.isFiltering = true;
               },
               icon: Icon(
                 Icons.filter_list,
@@ -53,7 +67,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         body: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('tasks').snapshots(),
+          stream: FirebaseFirestore.instance
+              .collection('tasks')
+              .where(
+                'taskCategory',
+                isEqualTo: !widget.isFiltering! ? null : widget.tasksCategory,
+              )
+              .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -87,27 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text('there is no tasks'),
             );
           },
-        )
-
-        /* ListView.builder(
-        itemCount: 10,
-        itemBuilder: (ctx, index) {
-          return TaskWidget(
-            ontap: () {
-              Navigator.pushNamed(ctx, TaskDetailsWidget.id);
-            },
-            imageUrl: 'https://cdn-icons-png.flaticon.com/512/4305/4305432.png',
-            des: 'Task des',
-            name: 'Task title',
-            icon: Icon(
-              Icons.keyboard_arrow_right,
-              size: 30.0,
-              color: Colors.pink.shade800,
-            ),
-            isTask: true,
-          );
-        },
-      ),*/
-        );
+        ));
   }
 }

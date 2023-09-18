@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../constants.dart';
 
-Future<dynamic> showCategoriesMethod(BuildContext context) {
+Future<dynamic> showCategoriesMethod(
+    BuildContext context, Function getCat, Function getFil) {
+  String? taskCat;
   return showDialog(
     context: context,
     builder: (context) {
@@ -15,6 +17,7 @@ Future<dynamic> showCategoriesMethod(BuildContext context) {
               child: Text('Close')),
           TextButton(
               onPressed: () {
+                getFil(false);
                 Navigator.canPop(context) ? Navigator.pop(context) : null;
               },
               child: Text('Cancel Filter'))
@@ -31,7 +34,9 @@ Future<dynamic> showCategoriesMethod(BuildContext context) {
                   padding: const EdgeInsets.all(12.0),
                   child: InkWell(
                     onTap: () {
-                      //print('${categores[index]}');
+                      taskCat = categores[index];
+                      getFil(true);
+                      getCat(taskCat);
                     },
                     child: Row(
                       children: [
